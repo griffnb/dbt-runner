@@ -1,26 +1,114 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  // To read settings for your extension
+  const config = vscode.workspace.getConfiguration("dbt-runner");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "dbt-runner" is now active!');
+  const exactCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_exact",
+    (path) => {
+      // Example: Getting a string setting
+      const dbtPath = config.get("command_path", "make run-select TABLE=");
+      const removeExtension = config.get("remove_extension", true);
+      let finalFile = getFile(path, removeExtension);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('dbt-runner.run', (path) => {
-		console.log("ARGS HERE", path.path);
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from RunTable!');
-	});
+      const fullCommand = `${dbtPath}${finalFile}`;
 
-	context.subscriptions.push(disposable);
+      // Create a terminal
+      const terminal = vscode.window.createTerminal("DBT Runner");
+
+      // Show the terminal
+      terminal.show();
+      // Execute the command
+      terminal.sendText(fullCommand);
+      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+    }
+  );
+
+  const prependCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_prepend",
+    (path) => {
+      // Example: Getting a string setting
+      const dbtPath = config.get("command_path", "make run-select TABLE=");
+      const removeExtension = config.get("remove_extension", true);
+      let finalFile = getFile(path, removeExtension);
+
+      const fullCommand = `${dbtPath}+${finalFile}`;
+
+      // Create a terminal
+      const terminal = vscode.window.createTerminal("DBT Runner");
+
+      // Show the terminal
+      terminal.show();
+      // Execute the command
+      terminal.sendText(fullCommand);
+      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+    }
+  );
+
+  const allCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_all",
+    (path) => {
+      // Example: Getting a string setting
+      const dbtPath = config.get("command_path", "make run-select TABLE=");
+      const removeExtension = config.get("remove_extension", true);
+      let finalFile = getFile(path, removeExtension);
+
+      const fullCommand = `${dbtPath}+${finalFile}+`;
+
+      // Create a terminal
+      const terminal = vscode.window.createTerminal("DBT Runner");
+
+      // Show the terminal
+      terminal.show();
+      // Execute the command
+      terminal.sendText(fullCommand);
+      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+    }
+  );
+
+  const afterCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_after",
+    (path) => {
+      // Example: Getting a string setting
+      const dbtPath = config.get("command_path", "make run-select TABLE=");
+      const removeExtension = config.get("remove_extension", true);
+      let finalFile = getFile(path, removeExtension);
+
+      const fullCommand = `${dbtPath}${finalFile}+`;
+
+      // Create a terminal
+      const terminal = vscode.window.createTerminal("DBT Runner");
+
+      // Show the terminal
+      terminal.show();
+      // Execute the command
+      terminal.sendText(fullCommand);
+      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+    }
+  );
+
+  context.subscriptions.push(exactCommand);
+  context.subscriptions.push(prependCommand);
+  context.subscriptions.push(allCommand);
+  context.subscriptions.push(afterCommand);
+}
+
+function getFile(path: vscode.Uri, removeExtension: boolean): string {
+  // Create a command with the file path
+
+  const fileName = path.fsPath.split("/").pop();
+
+  let finalFile = fileName;
+  if (removeExtension) {
+    finalFile = fileName ? fileName.replace(/\.[^/.]+$/, "") : "";
+  }
+
+  return finalFile || "";
 }
 
 // This method is called when your extension is deactivated

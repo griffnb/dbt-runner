@@ -14,15 +14,47 @@
   "contributes": {
     "commands": [
       {
-        "command": "dbt-runner.run",
-        "title": "Hello World"
+        "command": "dbt-runner.run_exact",
+        "title": "Run Exact Table",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_prepend",
+        "title": "Run +Table",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_all",
+        "title": "Run +Table+",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_after",
+        "title": "Run Table+",
+        "category": "DBT Runner"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "dbt-runner.run",
-          "group": "navigation@500"
+          "command": "dbt-runner.run_exact",
+          "group": "dbt_runner@1",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_prepend",
+          "group": "dbt_runner@2",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_after",
+          "group": "dbt_runner@3",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_all",
+          "group": "dbt_runner@4",
+          "when": "resourceExtname == '.sql'"
         }
       ]
     }
