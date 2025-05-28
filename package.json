@@ -1,7 +1,7 @@
 {
   "name": "dbt-runner",
-  "displayName": "RunTable",
-  "description": "DBT run a single table",
+  "displayName": "DBT Runner",
+  "description": "DBT Runner - Runs DBT models from context menu",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.100.0"
@@ -9,6 +9,10 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/griffnb/dbt-runner.git"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -31,6 +35,26 @@
       {
         "command": "dbt-runner.run_after",
         "title": "Run Table+",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_after_refresh",
+        "title": "Run Table+ (Refresh)",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_exact_refresh",
+        "title": "Run Exact Table (Refresh)",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_prepend_refresh",
+        "title": "Run +Table (Refresh)",
+        "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.run_all_refresh",
+        "title": "Run +Table+ (Refresh)",
         "category": "DBT Runner"
       }
     ],
@@ -55,6 +79,26 @@
           "command": "dbt-runner.run_all",
           "group": "dbt_runner@4",
           "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_exact_refresh",
+          "group": "dbt_runner@5",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_prepend_refresh",
+          "group": "dbt_runner@6",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_after_refresh",
+          "group": "dbt_runner@7",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.run_all_refresh",
+          "group": "dbt_runner@8",
+          "when": "resourceExtname == '.sql'"
         }
       ]
     }
@@ -71,7 +115,8 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "create-package": "vsce package"
   },
   "devDependencies": {
     "@types/vscode": "^1.100.0",

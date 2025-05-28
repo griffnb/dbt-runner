@@ -11,84 +11,56 @@ export function activate(context: vscode.ExtensionContext) {
   const exactCommand = vscode.commands.registerCommand(
     "dbt-runner.run_exact",
     (path) => {
-      // Example: Getting a string setting
-      const dbtPath = config.get("command_path", "make run-select TABLE=");
-      const removeExtension = config.get("remove_extension", true);
-      let finalFile = getFile(path, removeExtension);
-
-      const fullCommand = `${dbtPath}${finalFile}`;
-
-      // Create a terminal
-      const terminal = vscode.window.createTerminal("DBT Runner");
-
-      // Show the terminal
-      terminal.show();
-      // Execute the command
-      terminal.sendText(fullCommand);
-      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+      runCommand(config, path, false, (file) => file);
     }
   );
 
   const prependCommand = vscode.commands.registerCommand(
     "dbt-runner.run_prepend",
     (path) => {
-      // Example: Getting a string setting
-      const dbtPath = config.get("command_path", "make run-select TABLE=");
-      const removeExtension = config.get("remove_extension", true);
-      let finalFile = getFile(path, removeExtension);
-
-      const fullCommand = `${dbtPath}+${finalFile}`;
-
-      // Create a terminal
-      const terminal = vscode.window.createTerminal("DBT Runner");
-
-      // Show the terminal
-      terminal.show();
-      // Execute the command
-      terminal.sendText(fullCommand);
-      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+      runCommand(config, path, false, (file) => `+${file}`);
     }
   );
 
   const allCommand = vscode.commands.registerCommand(
     "dbt-runner.run_all",
     (path) => {
-      // Example: Getting a string setting
-      const dbtPath = config.get("command_path", "make run-select TABLE=");
-      const removeExtension = config.get("remove_extension", true);
-      let finalFile = getFile(path, removeExtension);
-
-      const fullCommand = `${dbtPath}+${finalFile}+`;
-
-      // Create a terminal
-      const terminal = vscode.window.createTerminal("DBT Runner");
-
-      // Show the terminal
-      terminal.show();
-      // Execute the command
-      terminal.sendText(fullCommand);
-      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+      runCommand(config, path, false, (file) => `+${file}+`);
     }
   );
 
   const afterCommand = vscode.commands.registerCommand(
     "dbt-runner.run_after",
     (path) => {
-      // Example: Getting a string setting
-      const dbtPath = config.get("command_path", "make run-select TABLE=");
-      const removeExtension = config.get("remove_extension", true);
-      let finalFile = getFile(path, removeExtension);
+      runCommand(config, path, false, (file) => `${file}+`);
+    }
+  );
 
-      const fullCommand = `${dbtPath}${finalFile}+`;
+  const exactRefreshCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_exact_refresh",
+    (path) => {
+      runCommand(config, path, true, (file) => file);
+    }
+  );
 
-      // Create a terminal
-      const terminal = vscode.window.createTerminal("DBT Runner");
+  const prependRefreshCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_prepend_refresh",
+    (path) => {
+      runCommand(config, path, true, (file) => `+${file}`);
+    }
+  );
 
-      // Show the terminal
-      terminal.show();
-      // Execute the command
-      terminal.sendText(fullCommand);
-      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+  const allRefreshCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_all_refresh",
+    (path) => {
+      runCommand(config, path, true, (file) => `+${file}+`);
+    }
+  );
+
+  const afterRefreshCommand = vscode.commands.registerCommand(
+    "dbt-runner.run_after_refresh",
+    (path) => {
+      runCommand(config, path, true, (file) => `${file}+`);
     }
   );
 
@@ -96,6 +68,35 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(prependCommand);
   context.subscriptions.push(allCommand);
   context.subscriptions.push(afterCommand);
+  context.subscriptions.push(exactRefreshCommand);
+  context.subscriptions.push(prependRefreshCommand);
+  context.subscriptions.push(allRefreshCommand);
+  context.subscriptions.push(afterRefreshCommand);
+}
+
+function runCommand(
+  config: vscode.WorkspaceConfiguration,
+  path: vscode.Uri,
+  fullRefresh: boolean,
+  fileWrap: (file: string) => string
+) {
+  // Example: Getting a string setting
+  const dbtPath = fullRefresh
+    ? config.get("refresh_command_path", "make run-select-refresh TABLE=")
+    : config.get("command_path", "make run-select TABLE=");
+  const removeExtension = config.get("remove_extension", true);
+  let finalFile = getFile(path, removeExtension);
+
+  const fullCommand = `${dbtPath}${fileWrap(finalFile)}`;
+
+  // Create a terminal
+  const terminal = vscode.window.createTerminal("DBT Runner");
+
+  // Show the terminal
+  terminal.show();
+  // Execute the command
+  terminal.sendText(fullCommand);
+  vscode.window.showInformationMessage(`Running: ${fullCommand}`);
 }
 
 function getFile(path: vscode.Uri, removeExtension: boolean): string {
