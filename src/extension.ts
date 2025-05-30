@@ -64,6 +64,66 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const createStgForSrc = vscode.commands.registerCommand(
+    "dbt-runner.create_stg_for_src",
+    async (path: vscode.Uri | undefined) => {
+      if (!path) {
+        vscode.window.showErrorMessage(
+          "No file selected. Please run this command from the file explorer context menu."
+        );
+        return;
+      }
+
+      const config = vscode.workspace.getConfiguration("dbt-runner");
+      const stgCommandPath = config.get<string>(
+        "stgCommandPath",
+        "make stg TABLE="
+      );
+
+      // 1. Get raw model_name from filename without extension
+      let model_name = getFile(path, true); // e.g., "src_adventureworks_customers"
+
+      // 2. Get directory_name from parent directory name
+      const parentUri = vscode.Uri.joinPath(path, "..");
+      const directory_name_parts = parentUri.fsPath.split(/[/\\]/); // Handles both / and \ separators
+      const directory_name = directory_name_parts.pop() || "";
+
+      if (!model_name) {
+        vscode.window.showErrorMessage(
+          "Could not determine model name from the selected file."
+        );
+        return;
+      }
+      if (!directory_name) {
+        vscode.window.showErrorMessage(
+          "Could not determine directory name (parent folder) from the selected file's path."
+        );
+        return;
+      }
+
+      // 3. Modify model_name
+      // Remove "src_" prefix
+      if (model_name.startsWith("src_")) {
+        model_name = model_name.substring(4);
+      }
+      // Remove "{directory_name}_" prefix
+      const directoryPrefix = `${directory_name}_`;
+      if (model_name.startsWith(directoryPrefix)) {
+        model_name = model_name.substring(directoryPrefix.length);
+      }
+
+      const tableArg = `${directory_name}/${model_name}`; // e.g., "adventureworks/customers"
+
+      // 4. Construct and run command
+      const fullCommand = `${stgCommandPath}${tableArg}`;
+
+      const terminal = vscode.window.createTerminal("DBT Runner STG");
+      terminal.show();
+      terminal.sendText(fullCommand);
+      vscode.window.showInformationMessage(`Running: ${fullCommand}`);
+    }
+  );
+
   context.subscriptions.push(exactCommand);
   context.subscriptions.push(prependCommand);
   context.subscriptions.push(allCommand);
@@ -72,6 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(prependRefreshCommand);
   context.subscriptions.push(allRefreshCommand);
   context.subscriptions.push(afterRefreshCommand);
+  context.subscriptions.push(createStgForSrc);
 }
 
 function runCommand(

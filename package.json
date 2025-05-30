@@ -56,6 +56,11 @@
         "command": "dbt-runner.run_all_refresh",
         "title": "Run +Table+ (Refresh)",
         "category": "DBT Runner"
+      },
+      {
+        "command": "dbt-runner.create_stg_for_src",
+        "title": "Create Staging Model",
+        "category": "DBT Runner"
       }
     ],
     "menus": {
@@ -98,6 +103,11 @@
         {
           "command": "dbt-runner.run_all_refresh",
           "group": "dbt_runner@8",
+          "when": "resourceExtname == '.sql'"
+        },
+        {
+          "command": "dbt-runner.create_stg_for_src",
+          "group": "dbt_runner@9",
           "when": "resourceExtname == '.sql'"
         }
       ]
